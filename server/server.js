@@ -3,7 +3,6 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 
-// ✅ Load .env FIRST before anything else
 dotenv.config();
 
 const batchRoutes = require("./routes/batchRoutes");
@@ -11,22 +10,29 @@ const connectDB = require("./config/db");
 
 const startServer = async () => {
   try {
-    // Wait for DB connection
     await connectDB();
 
     const app = express();
 
-    // CORS
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://192.168.11.11:3000",
+      "http://192.168.11.11:3001",
+      "http://192.168.11.7:3000",
+      "http://192.168.11.7:3001",
+      "https://caliyog-outdoor-fitness-669sakid1-devkarsayalis-projects.vercel.app",
+    ];
+
     app.use(
       cors({
-        origin: [
-          "http://localhost:3000",
-          "http://localhost:3001",
-          "http://192.168.11.11:3000",
-          "http://192.168.11.11:3001",
-          "http://192.168.11.7:3000",
-          "http://192.168.11.7:3001",
-        ],
+        origin: function (origin, callback) {
+          if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(new Error("Not allowed by CORS"));
+          }
+        },
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"],
         credentials: true,
@@ -35,13 +41,9 @@ const startServer = async () => {
 
     app.use(express.json({ limit: "20mb" }));
     app.use(express.urlencoded({ limit: "20mb", extended: true }));
-    
 
-    // ✅ Make uploaded images public
-    // Folder path: caliyog-backend/uploads
-    // Image URL example: http://localhost:5000/uploads/image-name.jpg
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-    // Health check route
+    app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
     app.get("/", (req, res) => {
       res.json({
         status: "running",
@@ -51,7 +53,6 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
       });
     });
 
-    // Routes
     app.use("/api/admin", require("./routes/adminRoutes"));
     app.use("/api/memberships", require("./routes/membershipRoutes"));
     app.use("/api/events", require("./routes/eventRoutes"));
@@ -65,17 +66,22 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
     app.use("/api/feedbacks", require("./routes/feedbackRoutes"));
     app.use("/api/transformations", require("./routes/transformationRoutes"));
 
-    // Global error handler
     app.use((err, req, res, next) => {
       console.error("🔥 Server Error:", err.message);
-      res.status(500).json({ error: err.message });
+      res.status(500).json({
+        success: false,
+        error: err.message,
+      });
     });
 
     const PORT = process.env.PORT || 5000;
 
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server Running On Port ${PORT}`);
-      console.log(`🌐 http://localhost:${PORT}`);
+      console.log(`🌐 Local: http://localhost:${PORT}`);
+      console.log(
+        `🌐 Railway: https://caliyog-fitness-backend-production-2144.up.railway.app`
+      );
       console.log(`🖼️ Uploads URL: http://localhost:${PORT}/uploads`);
     });
   } catch (error) {

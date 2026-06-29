@@ -26,8 +26,9 @@ exports.createBatch = async (req, res) => {
 
 exports.getBatches = async (req, res) => {
   try {
-    const batches = await Batch.find().sort({ createdAt: -1 });
-
+const batches = await Batch.find()
+      .sort({ _id: -1 })
+      .limit(50);
     res.status(200).json({
       success: true,
       data: batches,

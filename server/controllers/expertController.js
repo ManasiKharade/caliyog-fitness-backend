@@ -2,7 +2,9 @@ const Expert = require("../models/Expert");
 
 const getExperts = async (req, res) => {
   try {
-    const experts = await Expert.find().sort({ createdAt: -1 });
+     const experts = await Expert.find()
+      .sort({ _id: -1 })
+      .limit(100);
 
     res.status(200).json({
       success: true,
