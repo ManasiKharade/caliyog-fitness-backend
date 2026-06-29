@@ -5,7 +5,6 @@ const upload = require("../middleware/upload");
 const Event = require("../models/Event");
 const protectAdmin = require("../middleware/protectAdmin");
 
-// Helper: create full image URL
 const createImageUrl = (req) => {
   if (!req.file) return "";
 
@@ -15,7 +14,9 @@ const createImageUrl = (req) => {
 // GET all events
 router.get("/", async (req, res) => {
   try {
-    const events = await Event.find().sort({ createdAt: -1 });
+    const events = await Event.find()
+      .sort({ _id: -1 })
+      .limit(100);
 
     res.status(200).json({
       success: true,
@@ -30,7 +31,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ADD event with image upload
+// ADD event
 router.post("/", protectAdmin, upload.single("image"), async (req, res) => {
   try {
     const { eventType, title, description, location, date } = req.body;
@@ -44,6 +45,7 @@ router.post("/", protectAdmin, upload.single("image"), async (req, res) => {
       location,
       date,
       img: imageUrl,
+      image: imageUrl,
     });
 
     res.status(201).json({
@@ -60,10 +62,11 @@ router.post("/", protectAdmin, upload.single("image"), async (req, res) => {
   }
 });
 
-// UPDATE event with optional image upload
+// UPDATE event
 router.put("/:id", protectAdmin, upload.single("image"), async (req, res) => {
   try {
-    const { eventType, title, description, location, date, img } = req.body;
+    const { eventType, title, description, location, date, img, image } =
+      req.body;
 
     const oldEvent = await Event.findById(req.params.id);
 
@@ -76,17 +79,18 @@ router.put("/:id", protectAdmin, upload.single("image"), async (req, res) => {
 
     const imageUrl = req.file
       ? createImageUrl(req)
-      : img || oldEvent.img;
+      : image || img || oldEvent.image || oldEvent.img || "";
 
     const updatedEvent = await Event.findByIdAndUpdate(
       req.params.id,
       {
         eventType: eventType || oldEvent.eventType || "gallery",
-        title,
-        description,
-        location,
-        date,
+        title: title || oldEvent.title,
+        description: description || oldEvent.description,
+        location: location || oldEvent.location,
+        date: date || oldEvent.date,
         img: imageUrl,
+        image: imageUrl,
       },
       { new: true }
     );
@@ -107,8 +111,6 @@ router.put("/:id", protectAdmin, upload.single("image"), async (req, res) => {
 
 // DELETE event
 router.delete("/:id", protectAdmin, async (req, res) => {
-  console.log("DELETE EVENT HIT:", req.params.id);
-
   try {
     const event = await Event.findByIdAndDelete(req.params.id);
 
@@ -124,8 +126,6 @@ router.delete("/:id", protectAdmin, async (req, res) => {
       message: "Event deleted successfully",
     });
   } catch (error) {
-    console.log(error);
-
     res.status(500).json({
       success: false,
       message: "Failed to delete event",

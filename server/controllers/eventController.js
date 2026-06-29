@@ -2,7 +2,10 @@ const Event = require("../models/Event");
 
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find().sort({ createdAt: -1 });
+    const events = await Event.find()
+      .sort({ _id: -1 })
+      .limit(100);
+
     res.status(200).json(events);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -11,7 +14,18 @@ const getEvents = async (req, res) => {
 
 const addEvent = async (req, res) => {
   try {
-    const event = await Event.create(req.body);
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : "";
+
+    const event = await Event.create({
+      eventType: req.body.eventType,
+      title: req.body.title,
+      description: req.body.description,
+      location: req.body.location,
+      date: req.body.date,
+      img: imagePath,
+      image: imagePath,
+    });
+
     res.status(201).json({
       message: "Event added successfully",
       event,
@@ -23,11 +37,23 @@ const addEvent = async (req, res) => {
 
 const updateEvent = async (req, res) => {
   try {
-    const event = await Event.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const updateData = {
+      eventType: req.body.eventType,
+      title: req.body.title,
+      description: req.body.description,
+      location: req.body.location,
+      date: req.body.date,
+    };
+
+    if (req.file) {
+      const imagePath = `/uploads/${req.file.filename}`;
+      updateData.img = imagePath;
+      updateData.image = imagePath;
+    }
+
+    const event = await Event.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+    });
 
     res.status(200).json({
       message: "Event updated successfully",
