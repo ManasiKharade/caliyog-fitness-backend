@@ -21,6 +21,11 @@ const startServer = async () => {
       "http://192.168.11.11:3001",
       "http://192.168.11.7:3000",
       "http://192.168.11.7:3001",
+
+      // Your live Vercel site
+      "https://caliyog-outdoor-fitness.vercel.app",
+
+      // Old Vercel preview URL
       "https://caliyog-outdoor-fitness-669sakid1-devkarsayalis-projects.vercel.app",
     ];
 
@@ -30,6 +35,7 @@ const startServer = async () => {
           if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
           } else {
+            console.log("❌ Blocked by CORS:", origin);
             callback(new Error("Not allowed by CORS"));
           }
         },
@@ -39,6 +45,7 @@ const startServer = async () => {
       })
     );
 
+app.options(/.*/, cors());
     app.use(express.json({ limit: "20mb" }));
     app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
@@ -68,6 +75,7 @@ const startServer = async () => {
 
     app.use((err, req, res, next) => {
       console.error("🔥 Server Error:", err.message);
+
       res.status(500).json({
         success: false,
         error: err.message,
