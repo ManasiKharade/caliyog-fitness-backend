@@ -51,8 +51,7 @@ app.options(/.*/, cors());
     app.use(express.json({ limit: "20mb" }));
     app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
-    app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-
+    app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
     app.get("/", (req, res) => {
       res.json({
         status: "running",
@@ -75,7 +74,7 @@ app.options(/.*/, cors());
     app.use("/api/feedbacks", require("./routes/feedbackRoutes"));
     app.use("/api/transformations", require("./routes/transformationRoutes"));
     app.use("/api/about", aboutRoutes);
-app.use("/api/why-choose-us", whyChooseUsRoutes);
+    app.use("/api/why-choose-us", whyChooseUsRoutes);
     app.use((err, req, res, next) => {
       console.error("🔥 Server Error:", err.message);
 
