@@ -2,10 +2,15 @@ const mongoose = require("mongoose");
 
 const transformationSchema = new mongoose.Schema(
   {
-    name: String,
-    beforeImage: String,
-    afterImage: String,
-    description: String,
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    image: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );

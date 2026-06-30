@@ -10,6 +10,8 @@ const batchRoutes = require("./routes/batchRoutes");
 const connectDB = require("./config/db");
 const aboutRoutes = require("./routes/aboutRoutes");
 const whyChooseUsRoutes = require("./routes/whyChooseUsRoutes");
+const transformationRoutes = require("./routes/transformationRoutes");
+
 const startServer = async () => {
   try {
     await connectDB();
@@ -51,8 +53,7 @@ app.options(/.*/, cors());
     app.use(express.json({ limit: "20mb" }));
     app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
-    app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
-    app.get("/", (req, res) => {
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));    app.get("/", (req, res) => {
       res.json({
         status: "running",
         message: "CaliYog Fitness Club Backend Running",
@@ -72,7 +73,7 @@ app.options(/.*/, cors());
     app.use("/api/batches", batchRoutes);
     app.use("/api/batch-members", require("./routes/batchMemberRoutes"));
     app.use("/api/feedbacks", require("./routes/feedbackRoutes"));
-    app.use("/api/transformations", require("./routes/transformationRoutes"));
+    app.use("/api/transformations", transformationRoutes);
     app.use("/api/about", aboutRoutes);
     app.use("/api/why-choose-us", whyChooseUsRoutes);
     app.use((err, req, res, next) => {

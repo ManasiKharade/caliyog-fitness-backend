@@ -1,59 +1,119 @@
 const Transformation = require("../models/Transformation");
 
-const getTransformations = async (req, res) => {
+exports.getTransformations = async (req, res) => {
   try {
     const transformations = await Transformation.find().sort({ createdAt: -1 });
-    res.status(200).json(transformations);
+
+    res.status(200).json({
+      success: true,
+      data: transformations,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch transformations",
+      error: error.message,
+    });
   }
 };
 
-const addTransformation = async (req, res) => {
+exports.createTransformation = async (req, res) => {
   try {
-    const transformation = await Transformation.create(req.body);
+    if (!req.body.name) {
+      return res.status(400).json({
+        success: false,
+        message: "Transformation name is required",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Transformation image is required",
+      });
+    }
+
+    const transformation = await Transformation.create({
+      name: req.body.name,
+      image: `/uploads/transformations/${req.file.filename}`,
+    });
 
     res.status(201).json({
+      success: true,
       message: "Transformation added successfully",
-      transformation,
+      data: transformation,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to add transformation",
+      error: error.message,
+    });
   }
 };
 
-const updateTransformation = async (req, res) => {
+exports.updateTransformation = async (req, res) => {
   try {
+    const updatedData = {};
+
+    if (req.body.name) {
+      updatedData.name = req.body.name;
+    }
+
+    if (req.file) {
+      updatedData.image = `/uploads/transformations/${req.file.filename}`;
+    }
+
     const transformation = await Transformation.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true }
+      updatedData,
+      {
+        new: true,
+        runValidators: true,
+      }
     );
 
+    if (!transformation) {
+      return res.status(404).json({
+        success: false,
+        message: "Transformation not found",
+      });
+    }
+
     res.status(200).json({
+      success: true,
       message: "Transformation updated successfully",
-      transformation,
+      data: transformation,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update transformation",
+      error: error.message,
+    });
   }
 };
 
-const deleteTransformation = async (req, res) => {
+exports.deleteTransformation = async (req, res) => {
   try {
-    await Transformation.findByIdAndDelete(req.params.id);
+    const transformation = await Transformation.findByIdAndDelete(req.params.id);
+
+    if (!transformation) {
+      return res.status(404).json({
+        success: false,
+        message: "Transformation not found",
+      });
+    }
 
     res.status(200).json({
+      success: true,
       message: "Transformation deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete transformation",
+      error: error.message,
+    });
   }
-};
-
-module.exports = {
-  getTransformations,
-  addTransformation,
-  updateTransformation,
-  deleteTransformation,
 };
