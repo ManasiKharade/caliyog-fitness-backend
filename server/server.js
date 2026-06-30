@@ -9,6 +9,7 @@ dotenv.config();
 const batchRoutes = require("./routes/batchRoutes");
 const connectDB = require("./config/db");
 const aboutRoutes = require("./routes/aboutRoutes");
+const whyChooseUsRoutes = require("./routes/whyChooseUsRoutes");
 const startServer = async () => {
   try {
     await connectDB();
@@ -74,7 +75,7 @@ app.options(/.*/, cors());
     app.use("/api/feedbacks", require("./routes/feedbackRoutes"));
     app.use("/api/transformations", require("./routes/transformationRoutes"));
     app.use("/api/about", aboutRoutes);
-
+app.use("/api/why-choose-us", whyChooseUsRoutes);
     app.use((err, req, res, next) => {
       console.error("🔥 Server Error:", err.message);
 
