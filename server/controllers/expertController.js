@@ -2,14 +2,12 @@ const Expert = require("../models/Expert");
 
 const createImageUrl = (req) => {
   if (!req.file) return "";
-  return `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+  return `/uploads/${req.file.filename}`;
 };
 
 const getExperts = async (req, res) => {
   try {
-    const experts = await Expert.find()
-      .sort({ _id: -1 })
-      .limit(100);
+    const experts = await Expert.find().sort({ _id: -1 }).limit(100);
 
     res.status(200).json({
       success: true,
@@ -96,7 +94,14 @@ const updateExpert = async (req, res) => {
 
 const deleteExpert = async (req, res) => {
   try {
-    await Expert.findByIdAndDelete(req.params.id);
+    const expert = await Expert.findByIdAndDelete(req.params.id);
+
+    if (!expert) {
+      return res.status(404).json({
+        success: false,
+        message: "Expert not found",
+      });
+    }
 
     res.status(200).json({
       success: true,
