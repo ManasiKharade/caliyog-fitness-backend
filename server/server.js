@@ -7,7 +7,7 @@ dotenv.config();
 
 const batchRoutes = require("./routes/batchRoutes");
 const connectDB = require("./config/db");
-
+const aboutRoutes = require("./routes/aboutRoutes");
 const startServer = async () => {
   try {
     await connectDB();
@@ -72,6 +72,7 @@ app.options(/.*/, cors());
     app.use("/api/batch-members", require("./routes/batchMemberRoutes"));
     app.use("/api/feedbacks", require("./routes/feedbackRoutes"));
     app.use("/api/transformations", require("./routes/transformationRoutes"));
+    app.use("/api/about", aboutRoutes);
 
     app.use((err, req, res, next) => {
       console.error("🔥 Server Error:", err.message);
