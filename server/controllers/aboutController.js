@@ -1,18 +1,18 @@
 const About = require("../models/About");
 
-// GET about data
 exports.getAbout = async (req, res) => {
   try {
     let about = await About.findOne();
 
     if (!about) {
       about = await About.create({
-        title: "About CaliYog",
-        subtitle: "Outdoor Fitness Club",
+        title: "Welcome to CaliYog",
+        subtitle: "With Strength and Grace",
         description:
           "CaliYog Outdoor Fitness Club helps people build strength, improve fitness, and live a healthy lifestyle.",
-        mission: "To make fitness simple, affordable, and accessible.",
-        vision: "To build a strong and healthy fitness community.",
+        mission:
+          "To inspire people to live healthier, stronger, and more confident lives through outdoor fitness.",
+        vision: "",
         image1: "",
         image2: "",
       });
@@ -31,27 +31,38 @@ exports.getAbout = async (req, res) => {
   }
 };
 
-// UPDATE about data
 exports.updateAbout = async (req, res) => {
   try {
     let about = await About.findOne();
 
-    if (!about) {
-      about = await About.create(req.body);
-    } else {
-      about = await About.findByIdAndUpdate(about._id, req.body, {
-        new: true,
-        runValidators: true,
-      });
+    const updatedData = {
+      title: req.body.title,
+      subtitle: req.body.subtitle,
+      description: req.body.description,
+      mission: req.body.mission,
+      vision: req.body.vision,
+    };
+
+    if (req.files?.image1) {
+      updatedData.image1 = `/uploads/about/${req.files.image1[0].filename}`;
     }
 
-    res.status(200).json({
+    if (req.files?.image2) {
+      updatedData.image2 = `/uploads/about/${req.files.image2[0].filename}`;
+    }
+
+    if (!about) {
+      about = await About.create(updatedData);
+    } else {
+      await About.findByIdAndUpdate(about._id, updatedData);
+    }
+
+    return res.status(200).json({
       success: true,
-      message: "About section updated successfully",
-      data: about,
+      message: "About updated successfully",
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Failed to update about data",
       error: error.message,
