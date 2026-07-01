@@ -53,7 +53,7 @@ app.options(/.*/, cors());
     app.use(express.json({ limit: "20mb" }));
     app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
-    app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+  app.use("/uploads", express.static(path.join(__dirname, "../public_uploads")));
     app.get("/", (req, res) => {
       res.json({
         status: "running",

@@ -12,8 +12,7 @@ const {
 
 const router = express.Router();
 
-const uploadDir = path.join(__dirname, "../../uploads/transformations");
-
+const uploadDir = path.join(__dirname, "../../public_uploads/transformations");
 // Fix if transformations is accidentally created as a file
 if (fs.existsSync(uploadDir) && !fs.lstatSync(uploadDir).isDirectory()) {
   fs.unlinkSync(uploadDir);

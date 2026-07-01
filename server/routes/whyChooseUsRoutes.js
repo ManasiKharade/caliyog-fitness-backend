@@ -11,8 +11,9 @@ const {
   deleteWhyChooseUs,
 } = require("../controllers/whyChooseUsController");
 
-// Create upload folder if it doesn't exist
-const uploadDir = path.join(__dirname, "../../uploads/whychooseus");
+
+const uploadDir = path.join(__dirname, "../../public_uploads/whychooseus");
+
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
