@@ -2,13 +2,14 @@ const Batch = require("../models/Batch");
 
 exports.createBatch = async (req, res) => {
   try {
-    const { icon, title, points } = req.body;
+const { icon, lottieIcon, title, points } = req.body;
 
     const batch = await Batch.create({
-      icon,
-      title,
-      points: Array.isArray(points) ? points : [],
-    });
+  icon,
+  lottieIcon,
+  title,
+  points: Array.isArray(points) ? points : [],
+});
 
     res.status(201).json({
       success: true,
@@ -44,15 +45,16 @@ const batches = await Batch.find()
 
 exports.updateBatch = async (req, res) => {
   try {
-    const { icon, title, points } = req.body;
+const { icon, lottieIcon, title, points } = req.body;
 
     const batch = await Batch.findByIdAndUpdate(
       req.params.id,
       {
-        icon,
-        title,
-        points: Array.isArray(points) ? points : [],
-      },
+  icon,
+  lottieIcon,
+  title,
+  points: Array.isArray(points) ? points : [],
+},
       {
         new: true,
         runValidators: true,
