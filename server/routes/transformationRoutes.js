@@ -14,6 +14,11 @@ const router = express.Router();
 
 const uploadDir = path.join(__dirname, "../../uploads/transformations");
 
+// Fix if transformations is accidentally created as a file
+if (fs.existsSync(uploadDir) && !fs.lstatSync(uploadDir).isDirectory()) {
+  fs.unlinkSync(uploadDir);
+}
+
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -23,13 +28,13 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    const fileName =
+    const uniqueName =
       Date.now() +
       "-" +
       Math.round(Math.random() * 1e9) +
       path.extname(file.originalname);
 
-    cb(null, fileName);
+    cb(null, uniqueName);
   },
 });
 
@@ -42,7 +47,6 @@ const upload = multer({
     if (!file.mimetype.startsWith("image/")) {
       return cb(new Error("Only image files are allowed"));
     }
-
     cb(null, true);
   },
 });
