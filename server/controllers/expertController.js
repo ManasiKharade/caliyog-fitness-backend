@@ -1,37 +1,19 @@
 const Expert = require("../models/Expert");
+const { buildImageObject, attachBase64Images } = require("../utils/imageHelper");
 
-// Helper to save image as buffer in DB
-const buildImageObject = (req) => {
-  if (!req.file) return null;
-  return {
-    data: req.file.buffer,
-    contentType: req.file.mimetype,
-  };
-};
-
-// Helper to convert DB image to base64 URL for frontend
-const attachImageUrl = (expert) => {
-  if (!expert) return expert;
-  const obj = expert.toObject ? expert.toObject() : expert;
-
-  if (obj.image && obj.image.data) {
-    const base64 = obj.image.data.toString("base64");
-    obj.imageUrl = `data:${obj.image.contentType};base64,${base64}`;
-  }
-  return obj;
-};
-
-// GET ALL EXPERTS
+/**
+ * GET All Experts
+ * Retrieves list of fitness experts, converting DB image buffers to base64 URLs.
+ */
 const getExperts = async (req, res) => {
   try {
     const experts = await Expert.find().sort({ _id: -1 }).limit(100);
-
-    const expertsWithUrl = experts.map(attachImageUrl);
+    const expertsWithImages = experts.map(expert => attachBase64Images(expert, ["image", "img"]));
 
     res.status(200).json({
       success: true,
-      experts: expertsWithUrl,
-      data: expertsWithUrl,
+      experts: expertsWithImages,
+      data: expertsWithImages,
     });
   } catch (error) {
     res.status(500).json({
@@ -41,12 +23,14 @@ const getExperts = async (req, res) => {
   }
 };
 
-// ADD EXPERT
+/**
+ * ADD Fitness Expert
+ * Creates fitness expert record in database, saving file uploads as buffer objects.
+ */
 const addExpert = async (req, res) => {
   try {
     const { name, specialization, experience } = req.body;
-
-    const imageObj = buildImageObject(req);
+    const imageObj = buildImageObject(req.file);
 
     const expert = await Expert.create({
       name,
@@ -56,13 +40,13 @@ const addExpert = async (req, res) => {
       img: imageObj,
     });
 
-    const expertWithUrl = attachImageUrl(expert);
+    const expertWithImage = attachBase64Images(expert, ["image", "img"]);
 
     res.status(201).json({
       success: true,
       message: "Expert added successfully",
-      expert: expertWithUrl,
-      data: expertWithUrl,
+      expert: expertWithImage,
+      data: expertWithImage,
     });
   } catch (error) {
     res.status(500).json({
@@ -72,11 +56,13 @@ const addExpert = async (req, res) => {
   }
 };
 
-// UPDATE EXPERT
+/**
+ * UPDATE Fitness Expert
+ * Updates expert fields and replaces/retains the stored image buffer.
+ */
 const updateExpert = async (req, res) => {
   try {
     const { name, specialization, experience } = req.body;
-
     const oldExpert = await Expert.findById(req.params.id);
 
     if (!oldExpert) {
@@ -86,7 +72,7 @@ const updateExpert = async (req, res) => {
       });
     }
 
-    const imageObj = req.file ? buildImageObject(req) : (oldExpert.image || oldExpert.img);
+    const imageObj = req.file ? buildImageObject(req.file) : (oldExpert.image || oldExpert.img);
 
     const expert = await Expert.findByIdAndUpdate(
       req.params.id,
@@ -100,13 +86,13 @@ const updateExpert = async (req, res) => {
       { new: true }
     );
 
-    const expertWithUrl = attachImageUrl(expert);
+    const expertWithImage = attachBase64Images(expert, ["image", "img"]);
 
     res.status(200).json({
       success: true,
       message: "Expert updated successfully",
-      expert: expertWithUrl,
-      data: expertWithUrl,
+      expert: expertWithImage,
+      data: expertWithImage,
     });
   } catch (error) {
     res.status(500).json({
@@ -116,7 +102,10 @@ const updateExpert = async (req, res) => {
   }
 };
 
-// DELETE EXPERT
+/**
+ * DELETE Fitness Expert
+ * Removes expert entry from database.
+ */
 const deleteExpert = async (req, res) => {
   try {
     const expert = await Expert.findByIdAndDelete(req.params.id);

@@ -8,12 +8,18 @@ const eventSchema = new mongoose.Schema(
       required: true,
       default: "gallery",
     },
-
     title: String,
     location: String,
     date: String,
-    img: String,
-    image: String,
+    description: String,
+    img: {
+      data: Buffer,
+      contentType: String,
+    },
+    image: {
+      data: Buffer,
+      contentType: String,
+    },
   },
   { timestamps: true }
 );

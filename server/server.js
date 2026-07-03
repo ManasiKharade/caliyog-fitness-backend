@@ -53,13 +53,11 @@ app.options(/.*/, cors());
     app.use(express.json({ limit: "20mb" }));
     app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
- // app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
     app.get("/", (req, res) => {
       res.json({
         status: "running",
         message: "CaliYog Fitness Club Backend Running",
         database: "connected",
-        uploads: `${req.protocol}://${req.get("host")}/uploads`,
       });
     });
 
@@ -94,7 +92,6 @@ app.options(/.*/, cors());
       console.log(
         `🌐 Railway: https://caliyog-fitness-backend-production-2144.up.railway.app`
       );
-      console.log(`🖼️ Uploads URL: http://localhost:${PORT}/uploads`);
     });
   } catch (error) {
     console.error("❌ Failed to start server:", error.message);

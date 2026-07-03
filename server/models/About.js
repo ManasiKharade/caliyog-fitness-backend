@@ -24,12 +24,12 @@ const aboutSchema = new mongoose.Schema(
       default: "",
     },
     image1: {
-      type: String,
-      default: "",
+      data: Buffer,
+      contentType: String,
     },
     image2: {
-      type: String,
-      default: "",
+      data: Buffer,
+      contentType: String,
     },
   },
   { timestamps: true }

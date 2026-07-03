@@ -1,12 +1,18 @@
 const Transformation = require("../models/Transformation");
+const { buildImageObject, attachBase64Images } = require("../utils/imageHelper");
 
+/**
+ * GET All Transformations
+ * Retrieves list of transformations with base64 encoded images.
+ */
 exports.getTransformations = async (req, res) => {
   try {
     const transformations = await Transformation.find().sort({ createdAt: -1 });
+    const transformationsWithImages = transformations.map(item => attachBase64Images(item, ["image"]));
 
     res.status(200).json({
       success: true,
-      data: transformations,
+      data: transformationsWithImages,
     });
   } catch (error) {
     res.status(500).json({
@@ -17,6 +23,10 @@ exports.getTransformations = async (req, res) => {
   }
 };
 
+/**
+ * CREATE New Transformation
+ * Creates transformation item storing memory upload buffer directly in MongoDB.
+ */
 exports.createTransformation = async (req, res) => {
   try {
     if (!req.body.name) {
@@ -33,15 +43,19 @@ exports.createTransformation = async (req, res) => {
       });
     }
 
+    const imageObj = buildImageObject(req.file);
+
     const transformation = await Transformation.create({
       name: req.body.name,
-      image: `/uploads/transformations/${req.file.filename}`,
+      image: imageObj,
     });
+
+    const transformationWithImage = attachBase64Images(transformation, ["image"]);
 
     res.status(201).json({
       success: true,
       message: "Transformation added successfully",
-      data: transformation,
+      data: transformationWithImage,
     });
   } catch (error) {
     res.status(500).json({
@@ -52,8 +66,21 @@ exports.createTransformation = async (req, res) => {
   }
 };
 
+/**
+ * UPDATE Transformation
+ * Updates name or replaces transformation image in MongoDB.
+ */
 exports.updateTransformation = async (req, res) => {
   try {
+    const oldTransformation = await Transformation.findById(req.params.id);
+
+    if (!oldTransformation) {
+      return res.status(404).json({
+        success: false,
+        message: "Transformation not found",
+      });
+    }
+
     const updatedData = {};
 
     if (req.body.name) {
@@ -61,7 +88,7 @@ exports.updateTransformation = async (req, res) => {
     }
 
     if (req.file) {
-      updatedData.image = `/uploads/transformations/${req.file.filename}`;
+      updatedData.image = buildImageObject(req.file);
     }
 
     const transformation = await Transformation.findByIdAndUpdate(
@@ -73,17 +100,12 @@ exports.updateTransformation = async (req, res) => {
       }
     );
 
-    if (!transformation) {
-      return res.status(404).json({
-        success: false,
-        message: "Transformation not found",
-      });
-    }
+    const transformationWithImage = attachBase64Images(transformation, ["image"]);
 
     res.status(200).json({
       success: true,
       message: "Transformation updated successfully",
-      data: transformation,
+      data: transformationWithImage,
     });
   } catch (error) {
     res.status(500).json({
@@ -94,6 +116,10 @@ exports.updateTransformation = async (req, res) => {
   }
 };
 
+/**
+ * DELETE Transformation
+ * Removes transformation entry.
+ */
 exports.deleteTransformation = async (req, res) => {
   try {
     const transformation = await Transformation.findByIdAndDelete(req.params.id);

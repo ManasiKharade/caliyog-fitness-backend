@@ -1,7 +1,5 @@
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
 
 const {
   getTransformations,
@@ -12,35 +10,13 @@ const {
 
 const router = express.Router();
 
-const uploadDir = path.join(__dirname, "../../public_uploads/transformations");
-// Fix if transformations is accidentally created as a file
-if (fs.existsSync(uploadDir) && !fs.lstatSync(uploadDir).isDirectory()) {
-  fs.unlinkSync(uploadDir);
-}
-
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueName =
-      Date.now() +
-      "-" +
-      Math.round(Math.random() * 1e9) +
-      path.extname(file.originalname);
-
-    cb(null, uniqueName);
-  },
-});
+// Memory Storage for transformation images
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
   limits: {
-    fileSize: 2 * 1024 * 1024,
+    fileSize: 5 * 1024 * 1024, // 5MB limit
   },
   fileFilter: function (req, file, cb) {
     if (!file.mimetype.startsWith("image/")) {

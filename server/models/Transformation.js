@@ -8,8 +8,8 @@ const transformationSchema = new mongoose.Schema(
       trim: true,
     },
     image: {
-      type: String,
-      required: true,
+      data: Buffer,
+      contentType: String,
     },
   },
   { timestamps: true }
