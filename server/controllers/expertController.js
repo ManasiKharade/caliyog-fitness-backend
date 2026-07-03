@@ -1,19 +1,37 @@
 const Expert = require("../models/Expert");
 
-const createImageBase64 = (req) => {
-  if (!req.file) return "";
-
-  return `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+// Helper to save image as buffer in DB
+const buildImageObject = (req) => {
+  if (!req.file) return null;
+  return {
+    data: req.file.buffer,
+    contentType: req.file.mimetype,
+  };
 };
 
+// Helper to convert DB image to base64 URL for frontend
+const attachImageUrl = (expert) => {
+  if (!expert) return expert;
+  const obj = expert.toObject ? expert.toObject() : expert;
+
+  if (obj.image && obj.image.data) {
+    const base64 = obj.image.data.toString("base64");
+    obj.imageUrl = `data:${obj.image.contentType};base64,${base64}`;
+  }
+  return obj;
+};
+
+// GET ALL EXPERTS
 const getExperts = async (req, res) => {
   try {
     const experts = await Expert.find().sort({ _id: -1 }).limit(100);
 
+    const expertsWithUrl = experts.map(attachImageUrl);
+
     res.status(200).json({
       success: true,
-      experts,
-      data: experts,
+      experts: expertsWithUrl,
+      data: expertsWithUrl,
     });
   } catch (error) {
     res.status(500).json({
@@ -23,25 +41,28 @@ const getExperts = async (req, res) => {
   }
 };
 
+// ADD EXPERT
 const addExpert = async (req, res) => {
   try {
     const { name, specialization, experience } = req.body;
 
-    const imageBase64 = createImageBase64(req);
+    const imageObj = buildImageObject(req);
 
     const expert = await Expert.create({
       name,
       specialization,
       experience,
-      image: imageBase64,
-      img: imageBase64,
+      image: imageObj,
+      img: imageObj,
     });
+
+    const expertWithUrl = attachImageUrl(expert);
 
     res.status(201).json({
       success: true,
       message: "Expert added successfully",
-      expert,
-      data: expert,
+      expert: expertWithUrl,
+      data: expertWithUrl,
     });
   } catch (error) {
     res.status(500).json({
@@ -51,6 +72,7 @@ const addExpert = async (req, res) => {
   }
 };
 
+// UPDATE EXPERT
 const updateExpert = async (req, res) => {
   try {
     const { name, specialization, experience } = req.body;
@@ -64,9 +86,7 @@ const updateExpert = async (req, res) => {
       });
     }
 
-    const imageBase64 = req.file
-      ? createImageBase64(req)
-      : oldExpert.image || oldExpert.img || "";
+    const imageObj = req.file ? buildImageObject(req) : (oldExpert.image || oldExpert.img);
 
     const expert = await Expert.findByIdAndUpdate(
       req.params.id,
@@ -74,17 +94,19 @@ const updateExpert = async (req, res) => {
         name: name || oldExpert.name,
         specialization: specialization || oldExpert.specialization,
         experience: experience || oldExpert.experience,
-        image: imageBase64,
-        img: imageBase64,
+        image: imageObj,
+        img: imageObj,
       },
       { new: true }
     );
 
+    const expertWithUrl = attachImageUrl(expert);
+
     res.status(200).json({
       success: true,
       message: "Expert updated successfully",
-      expert,
-      data: expert,
+      expert: expertWithUrl,
+      data: expertWithUrl,
     });
   } catch (error) {
     res.status(500).json({
@@ -94,6 +116,7 @@ const updateExpert = async (req, res) => {
   }
 };
 
+// DELETE EXPERT
 const deleteExpert = async (req, res) => {
   try {
     const expert = await Expert.findByIdAndDelete(req.params.id);

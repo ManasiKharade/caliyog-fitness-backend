@@ -6,12 +6,12 @@ const expertSchema = new mongoose.Schema(
     specialization: String,
     experience: String,
     image: {
-      type: String,
-      default: "",
+      data: Buffer,
+      contentType: String,
     },
     img: {
-      type: String,
-      default: "",
+      data: Buffer,
+      contentType: String,
     },
   },
   { timestamps: true }
