@@ -1,8 +1,9 @@
 const Expert = require("../models/Expert");
 
-const createImageUrl = (req) => {
+const createImageBase64 = (req) => {
   if (!req.file) return "";
-  return `/uploads/${req.file.filename}`;
+
+  return `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
 };
 
 const getExperts = async (req, res) => {
@@ -25,14 +26,15 @@ const getExperts = async (req, res) => {
 const addExpert = async (req, res) => {
   try {
     const { name, specialization, experience } = req.body;
-    const imageUrl = createImageUrl(req);
+
+    const imageBase64 = createImageBase64(req);
 
     const expert = await Expert.create({
       name,
       specialization,
       experience,
-      image: imageUrl,
-      img: imageUrl,
+      image: imageBase64,
+      img: imageBase64,
     });
 
     res.status(201).json({
@@ -62,8 +64,8 @@ const updateExpert = async (req, res) => {
       });
     }
 
-    const imageUrl = req.file
-      ? createImageUrl(req)
+    const imageBase64 = req.file
+      ? createImageBase64(req)
       : oldExpert.image || oldExpert.img || "";
 
     const expert = await Expert.findByIdAndUpdate(
@@ -72,8 +74,8 @@ const updateExpert = async (req, res) => {
         name: name || oldExpert.name,
         specialization: specialization || oldExpert.specialization,
         experience: experience || oldExpert.experience,
-        image: imageUrl,
-        img: imageUrl,
+        image: imageBase64,
+        img: imageBase64,
       },
       { new: true }
     );

@@ -5,7 +5,7 @@ const path = require("path");
 
 
 dotenv.config();
-
+const adminRoutes = require("./routes/adminRoutes");
 const batchRoutes = require("./routes/batchRoutes");
 const connectDB = require("./config/db");
 const aboutRoutes = require("./routes/aboutRoutes");
@@ -21,10 +21,10 @@ const startServer = async () => {
     const allowedOrigins = [
       "http://localhost:3000",
       "http://localhost:3001",
-      "http://192.168.11.11:3000",
-      "http://192.168.11.11:3001",
-      "http://192.168.11.7:3000",
-      "http://192.168.11.7:3001",
+      "http://10.93.11.21:3000",
+      "http://192.168.11.21:3001",
+      "http://192.168.11.18:3000",
+      "http://192.168.11.18:3001",
 
       // Your live Vercel site
       "https://caliyog-outdoor-fitness.vercel.app",
@@ -53,7 +53,7 @@ app.options(/.*/, cors());
     app.use(express.json({ limit: "20mb" }));
     app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
-  app.use("/uploads", express.static(path.join(__dirname, "../public_uploads")));
+ // app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
     app.get("/", (req, res) => {
       res.json({
         status: "running",
@@ -63,7 +63,7 @@ app.options(/.*/, cors());
       });
     });
 
-    app.use("/api/admin", require("./routes/adminRoutes"));
+    app.use("/api/admin", adminRoutes);
     app.use("/api/memberships", require("./routes/membershipRoutes"));
     app.use("/api/events", require("./routes/eventRoutes"));
     app.use("/api/experts", require("./routes/expertRoutes"));

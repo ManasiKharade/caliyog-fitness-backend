@@ -2,22 +2,14 @@ const mongoose = require("mongoose");
 
 const expertSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    specialization: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    experience: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    name: String,
+    specialization: String,
+    experience: String,
     image: {
+      type: String,
+      default: "",
+    },
+    img: {
       type: String,
       default: "",
     },
