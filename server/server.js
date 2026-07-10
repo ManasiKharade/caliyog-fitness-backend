@@ -22,10 +22,10 @@ const startServer = async () => {
       "http://localhost:3000",
       
       "http://localhost:3001",
-      "http://10.93.11.21:3000",
-      "http://192.168.11.21:3001",
-      "http://192.168.11.18:3000",
-      "http://192.168.11.18:3001",
+      "http://10.93.11.10:3000",
+      "http://192.168.11.10:3001",
+      "http://192.168.11.8:3000",
+      "http://192.168.11.8:3001",
 
       // Your live Vercel site
       "https://caliyog-outdoor-fitness.vercel.app",
